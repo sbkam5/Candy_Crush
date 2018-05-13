@@ -1,0 +1,50 @@
+package edu.uci.assignment3;
+
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+
+public class Candy {
+    private int x, y, width, height;
+    Bitmap pic;
+    Rect dest;
+
+
+    public Candy(Resources res, int id, int x, int y, int width, int height){
+        pic = BitmapFactory.decodeResource(res, id);
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.dest = new Rect();
+    }
+
+    public void setLocation(int x, int y){
+        this.x = x;
+        this.y = y;
+    }
+
+    public void setSize(int w, int h){
+        width = w;
+        height = h;
+    }
+
+    public int getX(){
+        return x;
+    }
+
+    public int getY(){
+        return y;
+    }
+
+    public int getWidth(){
+        return width;
+    }
+
+    public int getHeight(){
+        return height;
+    }
+
+}
