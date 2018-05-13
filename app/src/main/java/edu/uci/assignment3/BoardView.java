@@ -17,7 +17,7 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
 
     Boolean exists;
 
-    Bitmap mybitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher_background);
+    Bitmap mybitmap = BitmapFactory.decodeResource(getResources(), R.drawable.jellybean);
 
     public BoardView(Context c, AttributeSet a, int defStyle){
         super(c, a, defStyle);
@@ -43,13 +43,15 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
     public void draw_it(Canvas c){
         c.drawColor(Color.BLACK); // Set the background to black
         Rect dst=new Rect() ;
-        dst.set(500 , 1500, 1000, 2000) ; // Set window to place image from (10 ,30) to (20 ,40)
+        dst.set(10 , 30, 20, 40) ; // Set window to place image from (10 ,30) to (20 ,40)
         c.drawBitmap ( mybitmap , null , dst , null ) ; // Draw the bitmap
 
-        Candy[][] candies = new Candy[2][2];
-        for(int x = 0; x < 2; x++){
-            for(int y = 0; y < 2; y++){
-                candies[x][y] = new Candy(getResources(), R.drawable.doughnut, x*50,y*50,50,50);
+        Candy[][] candies = new Candy[9][9];
+        int c_width = c.getWidth();
+        int c_height = c.getHeight();
+        for(int x = 0; x < 9; x++){
+            for(int y = 0; y < 9; y++){
+                candies[x][y] = new Candy(getResources(), R.drawable.doughnut, x*(c_width/9),y*(c_height/9),c_width/9,c_height/9);
                 candies[x][y].draw(c);
             }
         }
