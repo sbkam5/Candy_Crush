@@ -47,4 +47,8 @@ public class Candy {
         return height;
     }
 
+    public void draw(Canvas c){
+        dest.set(x,y, x+width, y+height);
+        c.drawBitmap(this.pic, null, dest, null);
+    }
 }
