@@ -13,6 +13,8 @@ import android.view.SurfaceView;
 
 public class BoardView extends SurfaceView {
 
+    Bitmap mybitmap = BitmapFactory. decodeResource ( getResources() , R.drawable.ic_launcher_background );
+
     public BoardView(Context c, AttributeSet a, int defStyle){
         super(c, a, defStyle);
     }
@@ -25,11 +27,9 @@ public class BoardView extends SurfaceView {
         super(c);
     }
 
-    Bitmap mybitmap= BitmapFactory. decodeResource ( getResources() , R.drawable.ic_launcher_background );
-
     protected void onDraw ( Canvas c ) {
         c.drawColor(Color.BLACK); // Set the background to black
-        Rect dst=new Rect () ;
+        Rect dst = new Rect () ;
         dst.set(10 , 30, 20, 40) ; // Set window to place image from (10 ,30) to (20 ,40)
         c.drawBitmap ( mybitmap , null , dst , null ) ; // Draw the bitmap
         }
