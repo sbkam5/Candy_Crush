@@ -16,10 +16,11 @@ import android.view.*;//.MotionEvent;
 
 public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
 
-    Boolean exists, clicked;
+    Boolean exists, clicked = false;
     enum direction {up, down, right, left};
     direction d;
-    int x_initial, y_initial, x_final, y_final, c_width, c_height;
+    int x_initial, y_initial, x_final, y_final, c_width, c_height, test = 0;
+    Candy candies[][] = new Candy[9][9];;
 
     Bitmap mybitmap = BitmapFactory.decodeResource(getResources(), R.drawable.jellybean);
 
@@ -39,9 +40,9 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
 
     public BoardView(Context c){
         super(c);
-
         getHolder().addCallback(this); //notify surface holder that you would like to receive Surfaceholder callbacks
         setFocusable(true);  //Important. For some reason
+
     }
 
     public void draw_it(Canvas c){
@@ -50,12 +51,8 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
         dst.set(10 , 30, 20, 40) ; // Set window to place image from (10 ,30) to (20 ,40)
         c.drawBitmap ( mybitmap , null , dst , null ) ; // Draw the bitmap
 
-        Candy[][] candies = new Candy[9][9];
-        c_width = c.getWidth();
-        c_height = c.getHeight();
         for(int x = 0; x < 9; x++){
             for(int y = 0; y < 9; y++){
-                candies[x][y] = new Candy(getResources(), R.drawable.doughnut, x*(c_width/9),y*(c_height/9),c_width/9,c_height/9);
                 candies[x][y].draw(c);
             }
         }
@@ -64,7 +61,21 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
     @Override
     public void surfaceCreated(SurfaceHolder holder){
         Canvas c = holder.lockCanvas();
-        this.draw_it(c);
+
+        c_width = c.getWidth();
+        c_height = c.getHeight();
+
+        for(int x = 0; x < 9; x++){
+            for(int y = 0; y < 9; y++){
+                if(x > 4 && y > 4) {
+                    candies[x][y] = new Candy(getResources(), R.drawable.doughnut, x * (c_width / 9), y * (c_height / 9), c_width / 9, c_height / 9);
+                }
+                else{
+                    candies[x][y] = new Candy(getResources(), R.drawable.jellybean, x * (c_width / 9), y * (c_height / 9), c_width / 9, c_height / 9);
+                }
+            }
+        }
+        draw_it(c);
         holder.unlockCanvasAndPost(c);
 
         this.exists = true;
@@ -90,8 +101,10 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
 
             x_initial = round(x_initial, true);  //find out what section this click was made in
             y_initial = round(y_initial, false);
-        }
 
+            test += 50;
+            clicked = true;
+        }
         else if ((e.getAction() == MotionEvent.ACTION_DOWN)&&clicked) {
             x_final = (int) e.getX();
             y_final = (int) e.getY();
@@ -99,9 +112,17 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
 
             x_final = round(x_final, true);
             y_final = round(y_final, false);
+
+            Bitmap temp = candies[x_initial][y_initial].pic;
+            candies[x_initial][y_initial].pic = candies[x_final][y_final].pic;
+            candies[x_final][y_final].pic = temp;
+            clicked = false;
         }
-
-
+        else if(e.getAction() == MotionEvent.ACTION_UP){
+            Canvas c = getHolder().lockCanvas();
+            draw_it(c);
+            getHolder().unlockCanvasAndPost(c);
+        }
 
         return true;
     }

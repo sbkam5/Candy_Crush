@@ -11,7 +11,7 @@ public class MainActivity extends AppCompatActivity {
     //board must be 9 x 9
     private int dim = 9;
     private int candyType = 6;
-    private int start_x
+    private int start_x;
     private Boolean GameStart;
     private int [][]candyIndex;
     Candy candy;
@@ -21,10 +21,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //BoardView b = new BoardView(this);
-        setContentView(R.layout.activity_main);
-        //setContentView(b);
-        candyIndex = new int[dim][dim];
+        BoardView b = new BoardView(this);
+        //setContentView(R.layout.activity_main);
+        setContentView(b);
+        //candyIndex = new int[dim][dim];
     }
 
     @Override
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private void randomMatrix() {
         for (int i = 0; i < dim; i++){
             for (int j = 0; j < dim; j++){
-                candyIndex[i][j] = Math.rand() % candyType;
+                candyIndex[i][j] = (int)Math.random() % candyType;
             }
         }
     }
@@ -82,6 +82,9 @@ public class MainActivity extends AppCompatActivity {
         if (x1>-1 && x1<dim && y1>-1 && y1<dim && x2>-1 && x2<dim && y2>-1 && y2<dim ){
             return true;
 
+        }
+        else{
+            return false;
         }
     }
 
