@@ -10,7 +10,7 @@ public class Candy {
     private int x, y, width, height;
     Bitmap pic;
     Rect dest;
-    Boolean marked = false;
+    private Boolean marked = false;
 
 
     public Candy(Resources res, int id, int x, int y, int width, int height){
@@ -59,5 +59,9 @@ public class Candy {
 
     public void unmark(){
         marked = false;
+    }
+
+    public Boolean getMark(){
+        return marked;
     }
 }

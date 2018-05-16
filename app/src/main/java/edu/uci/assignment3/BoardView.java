@@ -117,13 +117,16 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
             x_final = round(x_final, true);
             y_final = round(y_final, false);
 
-            Bitmap temp = candies[x_initial][y_initial].pic;
+            /*Bitmap temp = candies[x_initial][y_initial].pic;
             candies[x_initial][y_initial].pic = candies[x_final][y_final].pic;
-            candies[x_final][y_final].pic = temp;
+            candies[x_final][y_final].pic = temp;*/
             clicked++;  //let program know that this is a secondary click(candy to be replaced)
         }
         else if(e.getAction() == MotionEvent.ACTION_UP && (clicked == 2)){
-            Canvas c = getHolder().lockCanvas();
+            Canvas c = getHolder().lockCanvas();  //prep canvas for being drawn upon
+
+            move(x_initial, y_initial, x_final, y_final);
+
             shiftCheck();
             draw_it(c);
             getHolder().unlockCanvasAndPost(c);
@@ -166,7 +169,7 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
     public void shiftCheck(){  //this method checks to see if any candies are marked to be replaced.
         for(int x = 0; x < 9; x++){
             for(int y =0; y < 9; y++){
-                if (candies[x][y].marked){
+                if (candies[x][y].getMark()){
                     for(int z = y; z > 0; z--){
                         candies[x][z].pic = candies[x][z-1].pic; //if a marked candy is found, all of the images above it are shifted down to it.
                     }
@@ -197,5 +200,146 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
             break;
         }
         return x;
+    }
+
+    public void move(int x1,int y1,int x2,int y2){ //moves two candies if their move is valid
+        Bitmap pic1 = candies[x1][y1].pic;
+        Bitmap pic2 = candies[x2][y2].pic;
+
+        candies[x2][y2].pic = pic1;
+        candies[x1][y1].pic = pic2;
+
+        if(!validMove(x1, y1, x2, y2)){   //validity check
+            candies[x2][y2].pic = pic2;
+            candies[x1][y1].pic = pic1;
+        }
+    }
+
+    //checks if the move is valid
+    public boolean validMove(int x1,int y1,int x2,int y2){
+        if (x1>-1 && x1<9 && y1>-1 && y1<9 && x2>-1 && x2<9 && y2>-1 && y2<9 && checkSurrounding(x1, y1) || checkSurrounding(x2, y2)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public boolean checkSurrounding(int x, int y){
+
+        int same_candy = 0;
+
+        // checking right
+        if(9 - y > 2){
+
+            // if the candies are equal, return true
+            if(candies[x][y].pic == candies[x][y+1].pic && candies[x][y].pic == candies[x][y+2].pic){
+                candies[x][y].mark();
+                candies[x][y+1].mark();
+                candies[x][y+2].mark();
+                return true;
+            }
+            else {
+                same_candy++;
+            }
+        }
+        else {
+            same_candy++;
+        }
+
+        // checking left
+        if(y > 1){
+
+            if(candies[x][y].pic ==candies[x][y-1].pic && candies[x][y].pic == candies[x][y-2].pic){
+                candies[x][y].mark();
+                candies[x][y-1].mark();
+                candies[x][y-2].mark();
+                return true;
+            }
+            else
+                same_candy++;
+        }
+        else
+            same_candy++;
+
+        // checking up
+        if(x > 1){
+
+            if(candies[x][y].pic == candies[x-1][y].pic && candies[x][y].pic == candies[x-2][y].pic){
+                candies[x][y].mark();
+                candies[x-1][y].mark();
+                candies[x-2][y].mark();
+                return true;
+            }
+            else {
+                same_candy++;
+            }
+        }
+        else {
+            same_candy++;
+        }
+
+
+        // checking down
+        if(9 - x > 2){
+
+            if(candies[x][y].pic == candies[x+1][y].pic && candies[x][y].pic == candies[x+2][y].pic){
+                candies[x][y].mark();
+                candies[x+1][y].mark();
+                candies[x+2][y].mark();
+                return true;
+            }
+            else {
+                same_candy++;
+            }
+        }
+        else {
+            same_candy++;
+        }
+
+
+        // checking one left, one right
+        if(9 - y > 1 && y > 0){
+
+            if(candies[x][y].pic == candies[x][y+1].pic && candies[x][y].pic == candies[x][y-1].pic){
+                candies[x][y].mark();
+                candies[x][y+1].mark();
+                candies[x][y-1].mark();
+                return true;
+            }
+            else {
+                same_candy++;
+            }
+        }
+        else {
+            same_candy++;
+        }
+
+
+        // checking one up, one down
+        if(9 - x > 1 && x > 0){
+
+            // if equal, return true
+            if(candies[x][y].pic == candies[x+1][y].pic && candies[x][y].pic == candies[x-1][y].pic){
+                candies[x+1][y].mark();
+                candies[x][y].mark();
+                candies[x-1][y].mark();
+                return true;
+            }
+            else {
+                same_candy++;
+            }
+        }
+        else {
+            same_candy++;
+        }
+
+        if(same_candy == 6) {
+            return false;
+        }
+        else {
+            return true;
+        }
+
     }
 }
