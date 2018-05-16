@@ -52,4 +52,12 @@ public class Candy {
         dest.set(x,y, x+width, y+height);
         c.drawBitmap(this.pic, null, dest, null);
     }
+
+    public void mark(){
+        marked = true;
+    }
+
+    public void unmark(){
+        marked = false;
+    }
 }
