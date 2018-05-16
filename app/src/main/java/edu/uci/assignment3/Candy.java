@@ -10,6 +10,7 @@ public class Candy {
     private int x, y, width, height;
     Bitmap pic;
     Rect dest;
+    Boolean marked = false;
 
 
     public Candy(Resources res, int id, int x, int y, int width, int height){
@@ -50,5 +51,13 @@ public class Candy {
     public void draw(Canvas c){
         dest.set(x,y, x+width, y+height);
         c.drawBitmap(this.pic, null, dest, null);
+    }
+
+    public void mark(){
+        marked = true;
+    }
+
+    public void unmark(){
+        marked = false;
     }
 }
