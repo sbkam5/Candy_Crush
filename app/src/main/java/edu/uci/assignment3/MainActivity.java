@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import java.util.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -11,7 +12,7 @@ public class MainActivity extends AppCompatActivity {
     //board must be 9 x 9
     private int dim = 9;
     private int candyType = 6;
-    private int start_x
+    private int start_x;
     private Boolean GameStart;
     private int [][]candyIndex;
     Candy candy;
@@ -58,9 +59,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void randomMatrix() {
+        Random rand = new Random();
         for (int i = 0; i < dim; i++){
             for (int j = 0; j < dim; j++){
-                candyIndex[i][j] = Math.rand() % candyType;
+                candyIndex[i][j] = rand.nextInt(candyType);
             }
         }
     }
@@ -73,35 +75,25 @@ public class MainActivity extends AppCompatActivity {
         candyIndex[x2][y2] = pos1;
         candyIndex[x1][y1] = pos2;
 
-        //validmove
-        checkSurrounding(pos1, pos2);
+        if(!validMove(x1, y1, x2, y2)){
+            candyIndex[x2][y2] = pos2;
+            candyIndex[x1][y1] = pos1;
+        }
     }
 
     //checks if the move is valid
     public boolean validMove(int x1,int y1,int x2,int y2){
-        if (x1>-1 && x1<dim && y1>-1 && y1<dim && x2>-1 && x2<dim && y2>-1 && y2<dim ){
+        if (x1>-1 && x1<dim && y1>-1 && y1<dim && x2>-1 && x2<dim && y2>-1 && y2<dim && checkSurrounding(x1, y1) || checkSurrounding(x2, y2)){
             return true;
-
+        }
+        else{
+            return false;
         }
     }
 
     public boolean checkSurrounding(int x, int y){
 
         int same_candy = 0;
-
-
-        // checking left
-        if(y > 1){
-
-            if(candyIndex[x][y]==candyIndex[x][y-1] && candyIndex[x][y] == candyIndex[x][y-2]){
-                return true;
-            }
-            else
-                same_candy++;
-        }
-        else
-            same_candy++;
-
 
         // checking right
         if(dim - y > 2){
@@ -118,6 +110,17 @@ public class MainActivity extends AppCompatActivity {
             same_candy++;
         }
 
+        // checking left
+        if(y > 1){
+
+            if(candyIndex[x][y]==candyIndex[x][y-1] && candyIndex[x][y] == candyIndex[x][y-2]){
+                return true;
+            }
+            else
+                same_candy++;
+        }
+        else
+            same_candy++;
 
         // checking up
         if(x > 1){
