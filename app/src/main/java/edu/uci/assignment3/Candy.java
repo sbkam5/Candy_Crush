@@ -8,13 +8,15 @@ import android.graphics.Rect;
 
 public class Candy {
     private int x, y, width, height;
+    public int id;
     Bitmap pic;
     Rect dest;
-    Boolean marked = false;
+    private Boolean marked = false;
 
 
-    public Candy(Resources res, int id, int x, int y, int width, int height){
+    public Candy(Resources res, int id, int x, int y, int width, int height, int r){
         pic = BitmapFactory.decodeResource(res, id);
+        this.id = r;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -59,5 +61,9 @@ public class Candy {
 
     public void unmark(){
         marked = false;
+    }
+
+    public Boolean getMark(){
+        return marked;
     }
 }

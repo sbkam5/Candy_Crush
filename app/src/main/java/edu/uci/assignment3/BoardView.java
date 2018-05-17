@@ -23,7 +23,7 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
     int clicked = 0;
     enum direction {up, down, right, left};
     direction d;
-    int x_initial, y_initial, x_final, y_final, c_width, c_height, score = 0;
+    int x_initial, y_initial, x_final, y_final, c_width, c_height, score = 0, r;
     Candy candies[][] = new Candy[9][9];
 
     Paint paint = new Paint();
@@ -78,10 +78,10 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
 
         for(int x = 0; x < 9; x++){
             for(int y = 0; y < 9; y++){
-                int r = randomCandy();
-                candies[x][y] = new Candy(getResources(), r, x * (c_width / 9), y * (c_height / 9), c_width / 9, c_height / 9);
+                candies[x][y] = new Candy(getResources(), randomCandy(), x * (c_width / 9), y * (c_height / 9), c_width / 9, c_height / 9, r);
             }
         }
+
         draw_it(c);
         holder.unlockCanvasAndPost(c);
 
@@ -117,13 +117,16 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
             x_final = round(x_final, true);
             y_final = round(y_final, false);
 
-            Bitmap temp = candies[x_initial][y_initial].pic;
+            /*Bitmap temp = candies[x_initial][y_initial].pic;
             candies[x_initial][y_initial].pic = candies[x_final][y_final].pic;
-            candies[x_final][y_final].pic = temp;
+            candies[x_final][y_final].pic = temp;*/
             clicked++;  //let program know that this is a secondary click(candy to be replaced)
         }
         else if(e.getAction() == MotionEvent.ACTION_UP && (clicked == 2)){
-            Canvas c = getHolder().lockCanvas();
+            Canvas c = getHolder().lockCanvas();  //prep canvas for being drawn upon
+
+            move(x_initial, y_initial, x_final, y_final);
+
             shiftCheck();
             draw_it(c);
             getHolder().unlockCanvasAndPost(c);
@@ -166,18 +169,20 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
     public void shiftCheck(){  //this method checks to see if any candies are marked to be replaced.
         for(int x = 0; x < 9; x++){
             for(int y =0; y < 9; y++){
-                if (candies[x][y].marked){
+                if (candies[x][y].getMark()){
                     for(int z = y; z > 0; z--){
                         candies[x][z].pic = candies[x][z-1].pic; //if a marked candy is found, all of the images above it are shifted down to it.
+                        candies[x][z].id = candies[x][z-1].id;
                     }
                     candies[x][0].pic = BitmapFactory.decodeResource(getResources(),randomCandy());  //the top most image in the column is replaced with a random
+                    candies[x][0].id = r;
                 }
             }
         }
     }
 
     public int randomCandy(){  //returns the id of a random pic in resources.
-        int r = rand.nextInt(6);
+        r = rand.nextInt(6);
         int x;
 
         switch (r){
@@ -198,4 +203,74 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
         }
         return x;
     }
+
+
+    public void move(int x1,int y1,int x2,int y2){ //moves two candies if their move is valid
+        Bitmap pic1 = candies[x1][y1].pic;
+        int    i1   = candies[x1][y1].id;
+        Bitmap pic2 = candies[x2][y2].pic;
+        int    i2   = candies[x2][y2].id;
+
+        candies[x2][y2].pic = pic1;
+        candies[x2][y2].id  = i1;
+        candies[x1][y1].pic = pic2;
+        candies[x1][y1].id  = i2;      //swap the pics and ids of the candies in question
+
+        if(!validMove()){   //validity check
+            candies[x2][y2].pic = pic2;
+            candies[x2][y2].id  = i2;
+            candies[x1][y1].pic = pic1;
+            candies[x1][y1].id  = i1;
+        }
+    }
+
+    //checks if the move is valid
+    public boolean validMove(){
+        int temp;
+        int count = 1;
+        Boolean hit = false;
+        for(int x = 0; x < 9; x++){
+            for(int y = 0; y < 9; y++){
+                if(!candies[x][y].getMark()) {
+                    temp = candies[x][y].id; //we check every individual candy, unless it is already marked.
+
+                    //horizontal check
+                    for (int xn = x+1; xn < 9; xn++) {
+                        if (temp == candies[xn][y].id) {
+                            count++;           //count how many candies match with the current one.
+                        } else {
+                            break;           //once a different candy is detected, break this loop.
+                        }
+                    }
+                    if (count >= 3) {    //If count counted that at least 3 candies were lined up, then we mark them and tell code we found a hit.
+                        while (count > 0) {
+                            count--;
+                            candies[x + count][y].mark();
+                        }
+                        hit = true;
+                    }
+                    count = 1;  //reset count
+
+                    //vertical check
+                    for (int yn = y+1; yn < 9; yn++) {
+                        if (temp == candies[x][yn].id) {
+                            count++;           //count how many candies match with the current one.
+                        } else {
+                            break;           //once a different candy is detected, break this loop.
+                        }
+                    }
+                    if (count >= 3) {    //If count counted that at least 3 candies were lined up, then we mark them and tell code we found a hit.
+                        while (count > 0) {
+                            count--;
+                            candies[x][y + count].mark();
+                        }
+                        hit = true;
+                    }
+                    count = 1; //reset count
+                }
+            }
+        }
+        return hit;
+    }
+
 }

@@ -22,10 +22,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //BoardView b = new BoardView(this);
-        setContentView(R.layout.activity_main);
-        //setContentView(b);
-        candyIndex = new int[dim][dim];
+        BoardView b = new BoardView(this);
+        //setContentView(R.layout.activity_main);
+        setContentView(b);
+        //candyIndex = new int[dim][dim];
     }
 
     @Override
