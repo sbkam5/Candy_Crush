@@ -23,7 +23,7 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
     int clicked = 0;
     enum direction {up, down, right, left};
     direction d;
-    int x_initial, y_initial, x_final, y_final, c_width, c_height, score = 0;
+    int x_initial, y_initial, x_final, y_final, c_width, c_height, score = 0, r;
     Candy candies[][] = new Candy[9][9];
 
     Paint paint = new Paint();
@@ -78,10 +78,10 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
 
         for(int x = 0; x < 9; x++){
             for(int y = 0; y < 9; y++){
-                int r = randomCandy();
-                candies[x][y] = new Candy(getResources(), r, x * (c_width / 9), y * (c_height / 9), c_width / 9, c_height / 9);
+                candies[x][y] = new Candy(getResources(), randomCandy(), x * (c_width / 9), y * (c_height / 9), c_width / 9, c_height / 9, r);
             }
         }
+
         draw_it(c);
         holder.unlockCanvasAndPost(c);
 
@@ -172,15 +172,17 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
                 if (candies[x][y].getMark()){
                     for(int z = y; z > 0; z--){
                         candies[x][z].pic = candies[x][z-1].pic; //if a marked candy is found, all of the images above it are shifted down to it.
+                        candies[x][z].id = candies[x][z-1].id;
                     }
                     candies[x][0].pic = BitmapFactory.decodeResource(getResources(),randomCandy());  //the top most image in the column is replaced with a random
+                    candies[x][0].id = r;
                 }
             }
         }
     }
 
     public int randomCandy(){  //returns the id of a random pic in resources.
-        int r = rand.nextInt(6);
+        r = rand.nextInt(6);
         int x;
 
         switch (r){
@@ -202,144 +204,73 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
         return x;
     }
 
+
     public void move(int x1,int y1,int x2,int y2){ //moves two candies if their move is valid
         Bitmap pic1 = candies[x1][y1].pic;
+        int    i1   = candies[x1][y1].id;
         Bitmap pic2 = candies[x2][y2].pic;
+        int    i2   = candies[x2][y2].id;
 
         candies[x2][y2].pic = pic1;
+        candies[x2][y2].id  = i1;
         candies[x1][y1].pic = pic2;
+        candies[x1][y1].id  = i2;      //swap the pics and ids of the candies in question
 
-        if(!validMove(x1, y1, x2, y2)){   //validity check
+        if(!validMove()){   //validity check
             candies[x2][y2].pic = pic2;
+            candies[x2][y2].id  = i2;
             candies[x1][y1].pic = pic1;
+            candies[x1][y1].id  = i1;
         }
     }
 
     //checks if the move is valid
-    public boolean validMove(int x1,int y1,int x2,int y2){
-        if (x1>-1 && x1<9 && y1>-1 && y1<9 && x2>-1 && x2<9 && y2>-1 && y2<9 && checkSurrounding(x1, y1) || checkSurrounding(x2, y2)){
-            return true;
+    public boolean validMove(){
+        int temp;
+        int count = 1;
+        Boolean hit = false;
+        for(int x = 0; x < 9; x++){
+            for(int y = 0; y < 9; y++){
+                if(!candies[x][y].getMark()) {
+                    temp = candies[x][y].id; //we check every individual candy, unless it is already marked.
+
+                    //horizontal check
+                    for (int xn = x+1; xn < 9; xn++) {
+                        if (temp == candies[xn][y].id) {
+                            count++;           //count how many candies match with the current one.
+                        } else {
+                            break;           //once a different candy is detected, break this loop.
+                        }
+                    }
+                    if (count >= 3) {    //If count counted that at least 3 candies were lined up, then we mark them and tell code we found a hit.
+                        while (count > 0) {
+                            count--;
+                            candies[x + count][y].mark();
+                        }
+                        hit = true;
+                    }
+                    count = 1;  //reset count
+
+                    //vertical check
+                    for (int yn = y+1; yn < 9; yn++) {
+                        if (temp == candies[x][yn].id) {
+                            count++;           //count how many candies match with the current one.
+                        } else {
+                            break;           //once a different candy is detected, break this loop.
+                        }
+                    }
+                    if (count >= 3) {    //If count counted that at least 3 candies were lined up, then we mark them and tell code we found a hit.
+                        while (count > 0) {
+                            count--;
+                            candies[x][y + count].mark();
+                        }
+                        hit = true;
+                    }
+                    count = 1; //reset count
+                }
+            }
         }
-        else{
-            return false;
-        }
+        return hit;
     }
 
-    public boolean checkSurrounding(int x, int y){
-
-        int same_candy = 0;
-
-        // checking right
-        if(9 - y > 2){
-
-            // if the candies are equal, return true
-            if(candies[x][y].pic == candies[x][y+1].pic && candies[x][y].pic == candies[x][y+2].pic){
-                candies[x][y].mark();
-                candies[x][y+1].mark();
-                candies[x][y+2].mark();
-                return true;
-            }
-            else {
-                same_candy++;
-            }
-        }
-        else {
-            same_candy++;
-        }
-
-        // checking left
-        if(y > 1){
-
-            if(candies[x][y].pic ==candies[x][y-1].pic && candies[x][y].pic == candies[x][y-2].pic){
-                candies[x][y].mark();
-                candies[x][y-1].mark();
-                candies[x][y-2].mark();
-                return true;
-            }
-            else
-                same_candy++;
-        }
-        else
-            same_candy++;
-
-        // checking up
-        if(x > 1){
-
-            if(candies[x][y].pic == candies[x-1][y].pic && candies[x][y].pic == candies[x-2][y].pic){
-                candies[x][y].mark();
-                candies[x-1][y].mark();
-                candies[x-2][y].mark();
-                return true;
-            }
-            else {
-                same_candy++;
-            }
-        }
-        else {
-            same_candy++;
-        }
-
-
-        // checking down
-        if(9 - x > 2){
-
-            if(candies[x][y].pic == candies[x+1][y].pic && candies[x][y].pic == candies[x+2][y].pic){
-                candies[x][y].mark();
-                candies[x+1][y].mark();
-                candies[x+2][y].mark();
-                return true;
-            }
-            else {
-                same_candy++;
-            }
-        }
-        else {
-            same_candy++;
-        }
-
-
-        // checking one left, one right
-        if(9 - y > 1 && y > 0){
-
-            if(candies[x][y].pic == candies[x][y+1].pic && candies[x][y].pic == candies[x][y-1].pic){
-                candies[x][y].mark();
-                candies[x][y+1].mark();
-                candies[x][y-1].mark();
-                return true;
-            }
-            else {
-                same_candy++;
-            }
-        }
-        else {
-            same_candy++;
-        }
-
-
-        // checking one up, one down
-        if(9 - x > 1 && x > 0){
-
-            // if equal, return true
-            if(candies[x][y].pic == candies[x+1][y].pic && candies[x][y].pic == candies[x-1][y].pic){
-                candies[x+1][y].mark();
-                candies[x][y].mark();
-                candies[x-1][y].mark();
-                return true;
-            }
-            else {
-                same_candy++;
-            }
-        }
-        else {
-            same_candy++;
-        }
-
-        if(same_candy == 6) {
-            return false;
-        }
-        else {
-            return true;
-        }
-
-    }
 }
