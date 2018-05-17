@@ -82,7 +82,12 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
             }
         }
 
-        draw_it(c);
+        while(validMove()){
+            shiftCheck();  //keep shift checking until board is totally random.
+        }
+
+        score = 0;  //reset score to 0 after all of those shift checks.
+        draw_it(c);  //once board is finished randomizing, print it
         holder.unlockCanvasAndPost(c);
 
         this.exists = true;
@@ -166,7 +171,8 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
         return x;
     }
 
-    public void shiftCheck(){  //this method checks to see if any candies are marked to be replaced.
+    public boolean shiftCheck(){  //this method checks to see if any candies are marked to be replaced.
+        boolean i = false;
         for(int x = 0; x < 9; x++){
             for(int y =0; y < 9; y++){
                 if (candies[x][y].getMark()){
@@ -176,9 +182,13 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
                     }
                     candies[x][0].pic = BitmapFactory.decodeResource(getResources(),randomCandy());  //the top most image in the column is replaced with a random
                     candies[x][0].id = r;
+                    i = true;
+                    score += 10;
                 }
             }
         }
+        reset();
+        return i;
     }
 
     public int randomCandy(){  //returns the id of a random pic in resources.
@@ -273,4 +283,11 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
         return hit;
     }
 
+    public void reset(){
+        for(int x = 0; x < 9; x++){
+            for(int y = 0; y < 9; y++){
+                candies[x][y].unmark();
+            }
+        }
+    }
 }
