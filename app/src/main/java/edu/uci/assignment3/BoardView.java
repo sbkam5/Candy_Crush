@@ -61,12 +61,18 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
         //dst.set(10 , 30, 20, 40) ; // Set window to place image from (10 ,30) to (20 ,40)
         //c.drawBitmap ( mybitmap , null , dst , null ) ; // Draw the bitmap
 
-        for(int x = 0; x < 9; x++){
-            for(int y = 0; y < 9; y++){
-                candies[x][y].draw(c);
+        if(score < 200) {  //if score isn't sufficient, keep going.
+            for (int x = 0; x < 9; x++) {
+                for (int y = 0; y < 9; y++) {
+                    candies[x][y].draw(c);
+                }
             }
+            c.drawText(Integer.toString(score), 0, c_height + paint.getTextSize(), paint);
         }
-        c.drawText(Integer.toString(score), 0, c_height+paint.getTextSize(), paint);
+        else {   //If score is big enough, print out the win screen.
+            paint.setTextSize(50);
+            c.drawText("You got at least 200 points.You Win!", 100, 750, paint);
+        }
     }
 
     @Override
@@ -131,8 +137,12 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
             Canvas c = getHolder().lockCanvas();  //prep canvas for being drawn upon
 
             move(x_initial, y_initial, x_final, y_final);
+            shiftCheck();    //Do an initial shift check.
 
-            shiftCheck();
+            while(validMove()){
+                shiftCheck();  //keep shift checking until board is totally random.
+            }
+
             draw_it(c);
             getHolder().unlockCanvasAndPost(c);
             clicked = 0; //reset clicked back down to 0 to let the program know user is finished making a move.
