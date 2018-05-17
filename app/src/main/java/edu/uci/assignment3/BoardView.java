@@ -133,6 +133,7 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
             move(x_initial, y_initial, x_final, y_final);
 
             shiftCheck();
+            checkDeadlock();
             draw_it(c);
             getHolder().unlockCanvasAndPost(c);
             clicked = 0; //reset clicked back down to 0 to let the program know user is finished making a move.
@@ -290,4 +291,37 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
             }
         }
     }
+
+    public boolean checkDeadlock(){
+        for (int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                for ( int k = 0; k < 8; k++){  //horizontal check
+                    candies[i][j].id = candies[i+1][j].id;
+                    if (validMove()){
+                        candies[i+1][j].id = candies[i][j].id;
+                        reset();
+                        return true;
+                    }
+                    else{
+                        candies[i+1][j].id = candies[i][j].id;
+                        reset();
+                    }
+                }
+                for (int l = 0; l < 8; l++){  //vertical check
+                    candies[i][j].id = candies[i][j+1].id;
+                    if (validMove()){
+                        candies[i][j+1].id = candies[i][j].id;
+                        reset();
+                        return true;
+                    }
+                    else{
+                        candies[i][j+1].id = candies[i][j].id;
+                        reset();
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 }
