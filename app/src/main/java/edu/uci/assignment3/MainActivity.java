@@ -10,7 +10,7 @@ public class MainActivity extends AppCompatActivity {
 
     //There must be 6 different candies
     //board must be 9 x 9
-    private int dim = 9;
+    public int dim = 9;
     private int candyType = 6;
     private int start_x;
     private Boolean GameStart;
