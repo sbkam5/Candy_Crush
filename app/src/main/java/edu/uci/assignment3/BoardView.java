@@ -273,4 +273,18 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
         return hit;
     }
 
+    public boolean checkDeadlock(){
+        for (int i = 0; i < 9; i++){
+            for (int j = 0; j < 9; j++){
+                for (int k = 0; k < 9; k++){
+                    candies[i][j].id = candies[i+1][j].id;
+                    if (validMove()){
+                        candies[i+1][j].id = candies[i][j].id;
+
+                    }
+                }
+            }
+        }
+    }
+
 }
