@@ -61,12 +61,22 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
         //dst.set(10 , 30, 20, 40) ; // Set window to place image from (10 ,30) to (20 ,40)
         //c.drawBitmap ( mybitmap , null , dst , null ) ; // Draw the bitmap
 
-        for(int x = 0; x < 9; x++){
-            for(int y = 0; y < 9; y++){
-                candies[x][y].draw(c);
+        if(score < 200) {  //if score isn't sufficient, keep going.
+            for (int x = 0; x < 9; x++) {
+                for (int y = 0; y < 9; y++) {
+                    candies[x][y].draw(c);
+                }
             }
+            c.drawText(Integer.toString(score), 0, c_height + paint.getTextSize(), paint);
         }
-        c.drawText(Integer.toString(score), 0, c_height+paint.getTextSize(), paint);
+        else {   //If score is big enough, print out the win screen.
+            paint.setTextSize(50);
+            c.drawText("You got at least 200 points.You Win!", 100, 750, paint);
+        }
+        if(checkDeadlock()){
+            paint.setTextSize(50);
+            c.drawText("YOU LOSE!", 100, 750, paint);
+        }
     }
 
     @Override
@@ -131,6 +141,11 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
             Canvas c = getHolder().lockCanvas();  //prep canvas for being drawn upon
 
             move(x_initial, y_initial, x_final, y_final);
+            shiftCheck();    //Do an initial shift check.
+
+            while(validMove()){
+                shiftCheck();  //keep shift checking until board is totally random.
+            }
 
             shiftCheck();
             checkDeadlock();
@@ -217,6 +232,10 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
 
 
     public void move(int x1,int y1,int x2,int y2){ //moves two candies if their move is valid
+
+        if(Math.abs(x1-x2) != 1 && Math.abs(y1-y2) != 1){
+            return;
+        }
         Bitmap pic1 = candies[x1][y1].pic;
         int    i1   = candies[x1][y1].id;
         Bitmap pic2 = candies[x2][y2].pic;
@@ -225,7 +244,7 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
         candies[x2][y2].pic = pic1;
         candies[x2][y2].id  = i1;
         candies[x1][y1].pic = pic2;
-        candies[x1][y1].id  = i2;      //swap the pics and ids of the candies in question
+        candies[x1][y1].id  = i2;//swap the pics and ids of the candies in question
 
         if(!validMove()){   //validity check
             candies[x2][y2].pic = pic2;
