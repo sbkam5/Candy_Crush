@@ -73,6 +73,10 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
             paint.setTextSize(50);
             c.drawText("You got at least 200 points.You Win!", 100, 750, paint);
         }
+        if(checkDeadlock()){
+            paint.setTextSize(50);
+            c.drawText("YOU LOSE!", 100, 750, paint);
+        }
     }
 
     @Override
@@ -143,6 +147,8 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
                 shiftCheck();  //keep shift checking until board is totally random.
             }
 
+            shiftCheck();
+            checkDeadlock();
             draw_it(c);
             getHolder().unlockCanvasAndPost(c);
             clicked = 0; //reset clicked back down to 0 to let the program know user is finished making a move.
@@ -226,6 +232,10 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
 
 
     public void move(int x1,int y1,int x2,int y2){ //moves two candies if their move is valid
+
+        if(Math.abs(x1-x2) != 1 && Math.abs(y1-y2) != 1){
+            return;
+        }
         Bitmap pic1 = candies[x1][y1].pic;
         int    i1   = candies[x1][y1].id;
         Bitmap pic2 = candies[x2][y2].pic;
@@ -234,7 +244,7 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
         candies[x2][y2].pic = pic1;
         candies[x2][y2].id  = i1;
         candies[x1][y1].pic = pic2;
-        candies[x1][y1].id  = i2;      //swap the pics and ids of the candies in question
+        candies[x1][y1].id  = i2;//swap the pics and ids of the candies in question
 
         if(!validMove()){   //validity check
             candies[x2][y2].pic = pic2;
@@ -300,4 +310,37 @@ public class BoardView extends SurfaceView implements SurfaceHolder.Callback{
             }
         }
     }
+
+    public boolean checkDeadlock(){
+        for (int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                for ( int k = 0; k < 8; k++){  //horizontal check
+                    candies[i][j].id = candies[i+1][j].id;
+                    if (validMove()){
+                        candies[i+1][j].id = candies[i][j].id;
+                        reset();
+                        return true;
+                    }
+                    else{
+                        candies[i+1][j].id = candies[i][j].id;
+                        reset();
+                    }
+                }
+                for (int l = 0; l < 8; l++){  //vertical check
+                    candies[i][j].id = candies[i][j+1].id;
+                    if (validMove()){
+                        candies[i][j+1].id = candies[i][j].id;
+                        reset();
+                        return true;
+                    }
+                    else{
+                        candies[i][j+1].id = candies[i][j].id;
+                        reset();
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 }
